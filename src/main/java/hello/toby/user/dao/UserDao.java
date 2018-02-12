@@ -1,11 +1,20 @@
 package hello.toby.user.dao;
 
+import hello.toby.user.dao.connect.ConnectionMaker;
+import hello.toby.user.dao.connect.DConnectionMaker;
+
 import java.sql.*;
 
-public abstract class UserDao {
+public class UserDao {
+
+    private ConnectionMaker simpleConnectionMaker;
+
+    public UserDao() {
+        simpleConnectionMaker = new DConnectionMaker();
+    }
 
     public void add(User user) throws ClassNotFoundException, SQLException {
-        Connection conn = getConnection();
+        Connection conn = simpleConnectionMaker.makeConnection();
 
         PreparedStatement ps = conn.prepareStatement("INSERT INTO users(id, name, password) VALUES (?,?,?)");
         ps.setString(1, user.getId());
@@ -19,7 +28,7 @@ public abstract class UserDao {
     }
 
     public User get(String id) throws ClassNotFoundException, SQLException {
-        Connection conn = getConnection();
+        Connection conn = simpleConnectionMaker.makeConnection();
 
         PreparedStatement ps = conn.prepareStatement("SELECT * FROM users WHERE id = ?");
         ps.setString(1, id);
@@ -41,15 +50,10 @@ public abstract class UserDao {
     }
 
     public void deleteAll() throws ClassNotFoundException, SQLException {
-        Connection conn = getConnection();
+        Connection conn = simpleConnectionMaker.makeConnection();
 
         PreparedStatement ps = conn.prepareStatement("DELETE FROM users");
 
         ps.executeUpdate();
-    }
-
-    private Connection getConnection() throws ClassNotFoundException, SQLException {
-        Class.forName("org.h2.Driver");
-        return DriverManager.getConnection("jdbc:h2:tcp://localhost/~/toby", "sa", "");
     }
 }
